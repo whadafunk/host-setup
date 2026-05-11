@@ -10,20 +10,17 @@ fi
 
 PY_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
-# On Debian/Ubuntu, venv and pip are separate packages
 if command -v apt-get &>/dev/null; then
     MISSING=()
-    python3 -m ensurepip --version &>/dev/null || MISSING+=("python${PY_VER}-venv")
+    dpkg -s "python3-pip" &>/dev/null      || MISSING+=("python3-pip")
     dpkg -s "python${PY_VER}-venv" &>/dev/null || MISSING+=("python${PY_VER}-venv")
     if [ ${#MISSING[@]} -gt 0 ]; then
-        echo "Installing missing packages: ${MISSING[*]}"
+        echo "Installing: ${MISSING[*]}"
         apt-get install -y "${MISSING[@]}"
     fi
 fi
 
-python3 -m venv "$SCRIPT_DIR/.venv"
-"$SCRIPT_DIR/.venv/bin/pip" install --quiet --upgrade pip
-"$SCRIPT_DIR/.venv/bin/pip" install -r "$SCRIPT_DIR/requirements.txt"
+pip3 install --break-system-packages -r "$SCRIPT_DIR/requirements.txt"
 
 echo "Done. Run the tool with:"
-echo "  source .venv/bin/activate && python main.py"
+echo "  sudo python3 main.py"
